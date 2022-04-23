@@ -178,12 +178,16 @@ def get_dept_in_official_selection_year(args):
 
     df.year = year
     return df
+def get_awards_and_film_info():
+    df = get_award_df()
+    iter_list = df.film_link.tolist()
+    pool = multiprocessing.Pool(processes=4)
+    result_list = pool.map(get_film_info, iter_list)
+    res = pd.concat(result_list, ignore_index=True)
+    df = pd.concat([df, res], axis=1)
+    df.to_csv('awards_with_film_info.csv',index= False)
 
-def f(x):
-    return x[0]**2 + x[1]
-
-if __name__ == '__main__':
-    start = time.time()
+def get_official_selection():
     df = get_archives_info()
     official_selection_year_list = df[df.title == 'Official selection'].year.tolist()
     official_selection_link_list = df[df.title == 'Official selection'].link.tolist()
@@ -195,8 +199,15 @@ if __name__ == '__main__':
 
     res.to_csv('official_selection.csv',index = False)
 
+
+if __name__ == '__main__':
+    start = time.time()
+    #get_official_selection()
+    #get_awards_and_film_info()
+
     print("Success!!!!")
-    print('Elapsed time', (time.time() - start)/60, 'min')
+    print('Elapsed time', round((time.time() - start)/60,2), 'min')
+
 
 
 
